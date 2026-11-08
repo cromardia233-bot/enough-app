@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16130f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="있는 그대로">
+<title>있는 그대로</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root {
+    --bg: #16130f; --card: #221d17; --card2: #2d261e; --line: #3a3128;
+    --text: #f4ede4; --sub: #b0a493; --accent: #f2a65a; --accent2: #e0707a;
+    --good: #7fc8a0; --calm: #8fb3e0;
+    --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif; line-height: 1.6; }
+  body { overscroll-behavior: none; }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  input, textarea { font: inherit; color: var(--text); }
+  #app { max-width: 560px; margin: 0 auto; min-height: 100%;
+    padding: calc(var(--safe-t) + 12px) 16px calc(var(--safe-b) + 92px); }
+  .screen { display: none; animation: fade .25s ease; }
+  .screen.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* 공통 */
+  .top { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 16px; gap: 10px; }
+  .top h1 { font-size: 24px; margin: 0; letter-spacing: -.5px; }
+  .top h2 { font-size: 20px; margin: 0; letter-spacing: -.3px; flex: 1; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 12px; background: var(--card); display: grid; place-items: center; font-size: 18px; flex: none; }
+  .box { background: var(--card); border-radius: 18px; padding: 18px; margin-bottom: 12px; }
+  .box h3 { margin: 0 0 6px; font-size: 17px; }
+  .box p { margin: 6px 0; }
+  .muted { color: var(--sub); font-size: 14px; }
+  .small { font-size: 13px; }
+  .btn { display: block; width: 100%; padding: 15px; border-radius: 16px; font-weight: 700; font-size: 16px; background: var(--card2); text-align: center; margin-top: 10px; }
+  .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #1b130c; }
+  .btn:active, .item:active { transform: scale(.98); }
+  .btn small { display: block; font-weight: 500; font-size: 13px; opacity: .8; margin-top: 2px; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  .tag { display: inline-block; font-size: 12px; padding: 3px 9px; border-radius: 8px; background: var(--card2); color: var(--sub); }
+  .tag.a { background: rgba(242,166,90,.16); color: var(--accent); }
+
+  /* 홈 */
+  .quote { background: linear-gradient(135deg, rgba(242,166,90,.18), rgba(224,112,122,.16)); border: 1px solid rgba(242,166,90,.25); }
+  .quote .q { font-size: 21px; font-weight: 700; line-height: 1.5; letter-spacing: -.3px; margin: 8px 0; word-break: keep-all; }
+  .quick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .quick button { background: var(--card); border-radius: 16px; padding: 14px; text-align: left; font-size: 14px; color: var(--sub); }
+  .quick button b { display: block; color: var(--text); font-size: 15px; margin-top: 4px; }
+  .quick .e { font-size: 22px; }
+
+  /* 목록 아이템 */
+  .item { display: flex; gap: 14px; align-items: center; background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 10px; width: 100%; text-align: left; }
+  .item .e { font-size: 26px; flex: none; width: 36px; text-align: center; }
+  .item b { display: block; font-size: 16px; }
+  .item span.d { color: var(--sub); font-size: 13px; }
+
+  /* 이해하기 */
+  details { background: var(--card); border-radius: 16px; margin-bottom: 10px; overflow: hidden; }
+  summary { list-style: none; padding: 16px 18px; font-weight: 700; display: flex; gap: 12px; align-items: center; }
+  summary::-webkit-details-marker { display: none; }
+  summary .n { width: 28px; height: 28px; border-radius: 50%; background: var(--card2); color: var(--accent); display: grid; place-items: center; font-size: 14px; flex: none; }
+  summary::after { content: '＋'; margin-left: auto; color: var(--sub); }
+  details[open] summary::after { content: '－'; }
+  details .body { padding: 0 18px 16px; color: #e3d9cc; font-size: 15px; }
+  details .body p { margin: 8px 0; word-break: keep-all; }
+  .hl { background: var(--card2); border-left: 3px solid var(--accent); padding: 10px 12px; border-radius: 8px; margin: 10px 0; }
+
+  /* 폼 */
+  label.f { display: block; margin: 16px 0 6px; font-weight: 700; font-size: 15px; }
+  label.f .muted { display: block; font-weight: 400; font-size: 13px; }
+  textarea, input[type=text] { width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; font-size: 16px; resize: vertical; min-height: 52px; }
+  textarea:focus, input:focus { outline: none; border-color: var(--accent); }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .range-v { float: right; color: var(--accent); font-weight: 700; }
+
+  /* 단계형 가이드 */
+  .step { min-height: 46vh; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 10px 6px; }
+  .step .big { font-size: 22px; font-weight: 700; line-height: 1.55; word-break: keep-all; margin: 10px 0; }
+  .step .say { font-size: 18px; color: var(--accent); margin: 8px 0; word-break: keep-all; }
+  .dots { display: flex; justify-content: center; gap: 6px; margin: 10px 0; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+  .dots i.on { background: var(--accent); }
+
+  /* 타이머 */
+  .timer { font-size: 56px; font-weight: 800; text-align: center; letter-spacing: 1px; margin: 12px 0; font-variant-numeric: tabular-nums; }
+  .breath { width: 150px; height: 150px; border-radius: 50%; margin: 20px auto; background: radial-gradient(circle, rgba(242,166,90,.55), rgba(224,112,122,.15)); animation: breathe 10s ease-in-out infinite; }
+  .breath.paused { animation-play-state: paused; }
+  @keyframes breathe { 0%,100% { transform: scale(.7); } 50% { transform: scale(1.05); } }
+  .chips { display: flex; gap: 8px; justify-content: center; margin: 10px 0; }
+  .chip { padding: 8px 16px; border-radius: 999px; background: var(--card); color: var(--sub); font-size: 14px; }
+  .chip.on { background: var(--accent); color: #1b130c; }
+
+  /* 기록 */
+  .entry { background: var(--card); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; }
+  .entry .h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .entry .k { color: var(--sub); font-size: 12px; margin-top: 8px; }
+  .entry .v { white-space: pre-wrap; word-break: break-word; font-size: 15px; }
+  .entry .del { color: var(--sub); font-size: 12px; }
+  .chart svg { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 14px; font-size: 13px; color: var(--sub); margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 96px); transform: translateX(-50%); background: var(--card2); border: 1px solid var(--line);
+    padding: 10px 18px; border-radius: 999px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 50; }
+  .toast.on { opacity: 1; }
+
+  nav { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(22,19,15,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line); display: flex; justify-content: center; padding: 6px 0 calc(var(--safe-b) + 6px); z-index: 10; }
+  nav .in { display: flex; width: 100%; max-width: 560px; }
+  nav button { flex: 1; padding: 6px 0; font-size: 11px; color: var(--sub); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  nav button .e { font-size: 21px; }
+  nav button.on { color: var(--text); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 홈 -->
+  <section class="screen on" id="s-home">
+    <div class="top"><h1 id="hello">있는 그대로</h1></div>
+    <div class="box quote">
+      <span class="tag a">오늘의 문장</span>
+      <div class="q" id="quote"></div>
+      <div class="muted small">믿어지지 않아도 괜찮아요. 천천히 소리 내어 한 번만 읽어보세요.</div>
+      <button class="btn" id="next-quote" style="padding:10px;font-size:14px">다른 문장</button>
+    </div>
+
+    <div class="muted" style="margin:18px 2px 8px">지금 어떤 상태인가요?</div>
+    <div class="quick">
+      <button data-go="sos"><span class="e">🌧️</span><b>실수·실패했어요</b>자책이 올라올 때</button>
+      <button data-go="rest"><span class="e">🛋️</span><b>쉬는 게 불안해요</b>벌지 않은 휴식</button>
+      <button data-go="compassion"><span class="e">🤲</span><b>마음이 힘들어요</b>자기연민 3분</button>
+      <button data-go="evidence"><span class="e">🌱</span><b>하루를 마무리해요</b>존재의 증거 기록</button>
+    </div>
+
+    <div class="box">
+      <span class="tag">오늘 추천 연습</span>
+      <h3 id="today-title" style="margin-top:8px"></h3>
+      <div class="muted" id="today-desc"></div>
+      <button class="btn primary" id="today-go">시작하기</button>
+    </div>
+
+    <div class="box">
+      <div class="muted small" id="visits"></div>
+    </div>
+  </section>
+
+  <!-- 이해하기 -->
+  <section class="screen" id="s-learn">
+    <div class="top"><h1>이해하기</h1></div>
+    <p class="muted" style="margin-top:-6px">믿음은 생각만으로 바뀌지 않아요. 왜 생겼는지 이해하고, 새 경험을 반복해서 쌓을 때 천천히 바뀝니다.</p>
+    <div id="lessons"></div>
+  </section>
+
+  <!-- 연습 -->
+  <section class="screen" id="s-practice">
+    <div class="top"><h1>연습</h1></div>
+    <div id="practice-list"></div>
+  </section>
+
+  <!-- 기록 -->
+  <section class="screen" id="s-journal">
+    <div class="top"><h1>기록</h1></div>
+    <div class="box chart">
+      <h3>믿음의 변화</h3>
+      <div id="chart"></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>있는 그대로 충분하다</span><span><i style="background:var(--calm)"></i>성과를 내야 가치있다</span></div>
+      <button class="btn" data-go="belief" style="padding:11px;font-size:14px">지금 믿음 정도 체크하기</button>
+    </div>
+    <div id="entries"></div>
+    <div class="box">
+      <h3>백업</h3>
+      <p class="muted small">기록은 이 폰의 브라우저에만 저장돼요. 어디에도 전송되지 않아요. 폰을 바꾸거나 브라우저 데이터를 지우기 전에 백업해 두세요.</p>
+      <div class="row">
+        <button class="btn" id="export">내보내기</button>
+        <button class="btn" id="import">가져오기</button>
+      </div>
+      <input type="file" id="import-file" accept="application/json" hidden>
+    </div>
+    <div class="box">
+      <h3>혼자 감당하기 어려울 때</h3>
+      <p class="muted small">이 앱은 연습 도구이지 치료가 아니에요. 조건부 자기가치는 상담(특히 자기연민 중심 치료, 스키마 치료, CBT)에서 다루기 좋은 주제예요. 많이 힘든 날에는 자살예방상담전화 109(24시간), 정신건강위기상담 1577-0199에 연락할 수 있어요.</p>
+    </div>
+  </section>
+
+  <!-- 연습 상세 -->
+  <section class="screen" id="s-detail">
+    <div class="top"><button class="icon-btn" id="back">←</button><h2 id="d-title"></h2></div>
+    <div id="d-body"></div>
+  </section>
+</div>
+
+<nav><div class="in">
+  <button data-tab="home" class="on"><span class="e">🏠</span>홈</button>
+  <button data-tab="learn"><span class="e">📖</span>이해하기</button>
+  <button data-tab="practice"><span class="e">🧘</span>연습</button>
+  <button data-tab="journal"><span class="e">📓</span>기록</button>
+</div></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- 데이터 ----------
+const QUOTES = [
+  '나의 가치는 오늘 해낸 일의 양으로 정해지지 않는다.',
+  '사랑받을 자격은 버는 것이 아니라, 처음부터 가지고 있던 것이다.',
+  '성과는 내가 "하는 것"이고, 가치는 내가 "인 것"이다.',
+  '실패한 날의 나도, 잘해낸 날의 나와 똑같은 사람이다.',
+  '아무것도 하지 않고 쉬는 나도 존재할 자격이 있다.',
+  '나는 나에게 가장 친한 친구처럼 말해도 된다.',
+  '부족한 부분이 있는 것과 부족한 사람인 것은 다르다.',
+  '갓 태어난 아기는 아무것도 이루지 않았지만 충분히 사랑받을 만하다. 나도 그 아기였다.',
+  '노력은 내가 원해서 하는 것이지, 사랑의 입장료가 아니다.',
+  '"충분하다"는 느낌이 아직 없어도, 그건 사실이 아니라는 뜻이 아니다.',
+  '나를 비판하는 목소리는 나를 지키려고 생겨났다. 이제 그만 쉬어도 된다고 말해줄 수 있다.',
+  '완벽하지 않아도 사랑받는 것, 그게 사랑의 원래 모습이다.',
+  '내가 소중한 사람을 성과로 사랑하지 않듯, 나도 그렇게 사랑받을 수 있다.',
+  '오늘은 "잘했다" 대신 "있어줘서 고맙다"를 나에게 말해본다.',
+  '실수는 내가 한 행동이지, 내가 어떤 사람인지가 아니다.',
+  '쉬는 것은 다음 성과를 위한 충전이 아니어도 된다. 그냥 쉬어도 된다.',
+  '나의 존재는 증명해야 할 가설이 아니다.',
+  '비교에서 이겨야만 괜찮은 게 아니다. 나는 비교 밖에서도 괜찮다.',
+  '힘든 마음을 느끼는 것은 약함이 아니라 사람이라는 증거다.',
+  '조건부 사랑을 받았던 건 내 잘못이 아니었다. 그건 그때 그 사람들의 한계였다.',
+  '지금 이 순간, 숨 쉬고 있는 것만으로 충분하다.',
+  '내가 나를 믿어주는 데에도 연습이 필요하다. 오늘 한 번 더 연습한다.',
+  '"더 해야 해"라는 생각이 들 때, "지금으로도 괜찮아"라고 대답해 볼 수 있다.',
+  '좋은 결과는 기쁜 일이지만, 나의 가치를 올려주지는 않는다. 나쁜 결과도 가치를 깎지 않는다.',
+  '나는 고쳐야 할 프로젝트가 아니라, 돌봐야 할 사람이다.',
+  '남들이 보는 나보다, 내가 나를 대하는 방식이 더 오래 남는다.',
+  '느리게 가도, 멈춰 있어도, 나는 여전히 나다.',
+  '있는 그대로의 나를 보여줘도 떠나지 않는 사람들이 있다.',
+  '오늘 아무것도 이루지 못했다면, 오늘은 존재하는 연습을 한 날이다.',
+  '나에게 친절한 것은 게으름이 아니라, 오래 가기 위한 지혜다.'
+];
+
+const LESSONS = [
+  { t: '조건부 자기가치란?', b: `
+    <p>"성과를 내야 사랑받을 만하다"는 믿음을 심리학에서는 <b>조건부 자기가치(contingent self-worth)</b>라고 불러요. 나의 가치가 성적, 일, 인정, 외모 같은 <b>조건</b>에 묶여 있는 상태예요.</p>
+    <p>이 상태에서는 잘해낸 날엔 잠깐 괜찮다가, 실수한 날엔 "나 자체"가 무너지는 느낌이 들어요. 성과가 가치를 결정하니 쉬는 것도 불안하고, 칭찬을 들어도 "다음에도 해내야 해"라는 압박으로 바뀌어요.</p>
+    <div class="hl">연구(Crocker 등)에 따르면 자기가치가 성과에 묶일수록 자존감 기복이 크고, 스트레스와 불안이 높아지며, 역설적으로 장기적인 성과에도 좋지 않아요.</div>` },
+  { t: '이 믿음은 어디서 왔을까', b: `
+    <p>어릴 때 잘했을 때만 따뜻한 반응을 받고, 못했을 때 실망이나 냉담함을 경험했다면 아이는 자연스럽게 결론을 내려요. <b>"사랑은 잘해야 받는 거구나."</b></p>
+    <p>그건 아이로서 할 수 있는 가장 똑똑한 생존 전략이었어요. 문제가 있어서 생긴 게 아니라, 사랑을 지키려고 생긴 거예요.</p>
+    <div class="hl">이 믿음을 가진 건 당신의 잘못이 아니에요. 그리고 지금은 그때와 다른 선택을 할 수 있는 어른이에요.</div>` },
+  { t: '왜 머리로는 아는데 안 바뀔까', b: `
+    <p>"나는 충분하다"를 머리로 이해하는 것(지적 이해)과 몸으로 느끼는 것(정서적 믿음)은 달라요. 오래된 믿음은 <b>수천 번의 경험</b>으로 만들어졌기 때문에, 몇 번의 다짐으로는 바뀌지 않아요.</p>
+    <p>그래서 필요한 것은 <b>반복</b>이에요. 근육처럼, 새 믿음도 작은 경험을 매일 쌓아야 자라요. 그리고 처음에는 어색하고 거짓말처럼 느껴지는 게 정상이에요.</p>
+    <div class="hl">"믿어지지 않는데 해도 되나?" → 네. 연습은 느낌보다 먼저 와요. 느낌은 나중에 따라옵니다.</div>` },
+  { t: '1단계 · 알아차리기', b: `
+    <p>먼저 그 믿음이 <b>언제, 어떻게</b> 작동하는지 알아차리는 거예요. 예를 들면:</p>
+    <p>• 쉬려고 하면 죄책감이 든다<br>• 칭찬을 들어도 "운이었어"라고 넘긴다<br>• 실수 하나에 "나는 왜 이 모양이지"가 튀어나온다<br>• 바쁘지 않으면 불안하다</p>
+    <p>알아차릴 때마다 속으로 <b>"아, 또 성과 이야기가 왔구나"</b>라고 이름을 붙여주세요. 이름을 붙이는 것만으로도 그 생각과 나 사이에 거리가 생겨요.</p>` },
+  { t: '2단계 · 생각과 거리두기', b: `
+    <p>"나는 가치없어"는 사실이 아니라 <b>생각</b>이에요. ACT(수용전념치료)에서는 이걸 <b>탈융합</b>이라고 해요. 생각과 나를 한 덩어리로 보지 않는 거예요.</p>
+    <div class="hl">"나는 부족해" → "나는 '나는 부족해'라는 생각을 하고 있다" → "내 마음이 또 익숙한 이야기를 들려주고 있구나"</div>
+    <p>생각을 없애려 싸울 필요는 없어요. 그냥 지나가는 버스처럼 바라보면 돼요. [연습] 탭의 <b>생각과 거리두기</b>를 써보세요.</p>` },
+  { t: '3단계 · 자기연민', b: `
+    <p>Kristin Neff의 연구에 따르면 자기연민은 세 가지로 이뤄져요.</p>
+    <p><b>① 마음챙김</b>: "지금 힘들구나" 하고 고통을 있는 그대로 인정하기<br>
+    <b>② 보편적 인간성</b>: "이런 감정은 누구나 겪는 거야" 나만 이상한 게 아님을 기억하기<br>
+    <b>③ 자기친절</b>: 친한 친구에게 하듯 나에게 따뜻하게 말하기</p>
+    <div class="hl">자기연민은 자기 합리화나 게으름이 아니에요. 연구상 자기연민이 높은 사람이 실패 후 더 빨리 회복하고, 오히려 더 꾸준히 노력해요.</div>` },
+  { t: '4단계 · 새 증거 모으기', b: `
+    <p>오래된 믿음은 그에 맞는 증거만 골라 기억해요(확증 편향). 그래서 의도적으로 <b>반대쪽 증거</b>를 모아야 해요. 인지치료의 Padesky가 제안한 "긍정 자료 기록"이에요.</p>
+    <p>핵심은 <b>성과와 무관한</b> 증거를 모으는 거예요.</p>
+    <p>• 아무것도 안 했는데 친구가 연락해줬다<br>• 내가 실수했을 때도 누군가 다정했다<br>• 내가 누군가의 말을 진심으로 들어줬다<br>• 노을을 보고 잠깐 좋았다</p>
+    <p>매일 하나씩, 몇 주가 쌓이면 믿음의 저울이 조금씩 기울어요.</p>` },
+  { t: '5단계 · 행동으로 실험하기', b: `
+    <p>믿음은 <b>새 경험</b>으로 가장 잘 바뀌어요. 두려운 걸 작게 해보고, 예상한 일이 실제로 일어나는지 확인하는 거예요.</p>
+    <p>• 성과 없이 30분 쉬어보기 → 정말 큰일이 났나?<br>
+    • 일을 80%만 하고 내보기 → 정말 사람들이 나를 싫어했나?<br>
+    • "잘 모르겠어요"라고 말해보기 → 관계가 무너졌나?<br>
+    • 칭찬을 들으면 반박 대신 "고마워요"만 말하기</p>
+    <div class="hl">처음엔 불안이 올라오는 게 정상이에요. 불안이 올라와도 해보는 것, 그게 연습이에요.</div>` },
+  { t: '6단계 · 반복, 그리고 되돌아감을 허락하기', b: `
+    <p>변화는 직선이 아니에요. 좋아졌다가 다시 예전 생각으로 돌아가는 날이 반드시 와요. 그건 실패가 아니라 <b>변화의 정상적인 모양</b>이에요.</p>
+    <p>그리고 주의할 점: 이 연습마저 <b>"잘 해내야 할 과제"</b>가 되면 안 돼요. 며칠 빼먹어도 괜찮아요. 이 앱에 연속 기록(스트릭)이 없는 이유예요.</p>
+    <div class="hl">"나는 있는 그대로 충분하다"는 결국 도착해야 할 목표가 아니라, 처음부터 사실이었던 것을 다시 기억해가는 과정이에요.</div>` }
+];
+
+const PRACTICES = [
+  { id: 'compassion', e: '🤲', t: '자기연민 휴식', d: '3분 · 힘들 때 나를 달래는 3단계' },
+  { id: 'reframe', e: '🔍', t: '생각 다시보기', d: '5분 · 자책하는 생각을 친구의 눈으로' },
+  { id: 'defuse', e: '🎈', t: '생각과 거리두기', d: '1분 · "나는 부족해"를 생각으로 바라보기' },
+  { id: 'evidence', e: '🌱', t: '존재의 증거', d: '2분 · 성과와 무관한 오늘의 따뜻한 순간' },
+  { id: 'rest', e: '🛋️', t: '벌지 않은 휴식', d: '3~10분 · 아무것도 안 하는 연습' },
+  { id: 'experiment', e: '🧪', t: '행동 실험', d: '두려운 예측을 작게 시험해보기' },
+  { id: 'letter', e: '✉️', t: '어린 나에게 편지', d: '10분 · 조건 없이 사랑해주는 어른 되기' },
+  { id: 'belief', e: '📊', t: '믿음 체크', d: '30초 · 지금 얼마나 믿어지는지 기록' },
+  { id: 'sos', e: '🌧️', t: '실패했을 때 SOS', d: '2분 · 자책의 소용돌이에서 빠져나오기' }
+];
+const TYPE_NAME = { reframe: '생각 다시보기', evidence: '존재의 증거', rest: '벌지 않은 휴식', experiment: '행동 실험', letter: '어린 나에게', belief: '믿음 체크', defuse: '생각과 거리두기' };
+
+// ---------- 저장 ----------
+const KEY = 'enough-v1';
+let D = load();
+function load() {
+  try { return Object.assign({ entries: [], visits: [] }, JSON.parse(localStorage.getItem(KEY) || '{}')); }
+  catch { return { entries: [], visits: [] }; }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(D)); }
+function addEntry(type, data) {
+  D.entries.unshift({ id: Date.now().toString(36), type, at: new Date().toISOString(), data });
+  save();
+}
+
+// ---------- 유틸 ----------
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const dayNum = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 1800); }
+function fmtDate(iso) { const d = new Date(iso); return `${d.getMonth() + 1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+
+// ---------- 화면 전환 ----------
+let curTab = 'home', timerH = null;
+function tab(name) {
+  stopTimer();
+  curTab = name;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('on', s.id === 's-' + name));
+  document.querySelectorAll('nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
+  if (name === 'home') renderHome();
+  if (name === 'journal') renderJournal();
+  scrollTo(0, 0);
+}
+function openPractice(id) {
+  stopTimer();
+  const p = PRACTICES.find((x) => x.id === id);
+  $('#d-title').textContent = p.t;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('on', s.id === 's-detail'));
+  RENDER[id]($('#d-body'));
+  scrollTo(0, 0);
+}
+document.querySelectorAll('nav button').forEach((b) => b.onclick = () => tab(b.dataset.tab));
+document.addEventListener('click', (e) => { const g = e.target.closest('[data-go]'); if (g) openPractice(g.dataset.go); });
+$('#back').onclick = () => tab(curTab);
+
+// ---------- 홈 ----------
+let qi = dayNum() % QUOTES.length;
+function renderHome() {
+  const h = new Date().getHours();
+  $('#hello').textContent = h < 6 ? '늦은 밤이에요' : h < 12 ? '좋은 아침이에요' : h < 18 ? '오늘도 와줬네요' : '오늘 하루 수고 많았어요';
+  $('#quote').textContent = QUOTES[qi];
+  const rec = PRACTICES[dayNum() % (PRACTICES.length - 1)];
+  $('#today-title').textContent = rec.e + ' ' + rec.t;
+  $('#today-desc').textContent = rec.d;
+  $('#today-go').onclick = () => openPractice(rec.id);
+  const n = D.visits.length;
+  $('#visits').textContent = n <= 1
+    ? '여기 와준 것 자체로 이미 충분해요.'
+    : `지금까지 ${n}일 이곳에 들렀어요. 빠진 날이 있어도 괜찮아요. 이건 성적표가 아니니까요.`;
+}
+$('#next-quote').onclick = () => { qi = (qi + 1) % QUOTES.length; $('#quote').textContent = QUOTES[qi]; };
+
+// ---------- 이해하기 / 연습 목록 ----------
+$('#lessons').innerHTML = LESSONS.map((l, i) => `<details${i === 0 ? ' open' : ''}><summary><span class="n">${i + 1}</span>${l.t}</summary><div class="body">${l.b}</div></details>`).join('');
+$('#practice-list').innerHTML = PRACTICES.map((p) => `<button class="item" data-go="${p.id}"><span class="e">${p.e}</span><span><b>${p.t}</b><span class="d">${p.d}</span></span></button>`).join('');
+
+// ---------- 공통 빌더 ----------
+function stepper(el, steps, onDone) {
+  let i = 0;
+  const draw = () => {
+    const s = steps[i];
+    el.innerHTML = `<div class="dots">${steps.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
+      <div class="step">${s.sub ? `<div class="muted">${s.sub}</div>` : ''}<div class="big">${s.big}</div>${s.say ? `<div class="say">${s.say}</div>` : ''}${s.note ? `<div class="muted small" style="margin-top:10px">${s.note}</div>` : ''}</div>
+      <div class="row">${i > 0 ? '<button class="btn" id="st-prev">이전</button>' : ''}<button class="btn primary" id="st-next">${i === steps.length - 1 ? '마치기' : '다음'}</button></div>`;
+    if (i > 0) $('#st-prev', el).onclick = () => { i--; draw(); };
+    $('#st-next', el).onclick = () => { if (i < steps.length - 1) { i++; draw(); } else onDone(); };
+  };
+  draw();
+}
+function form(el, intro, fields, type, doneMsg, textOptional = false) {
+  el.innerHTML = `<p class="muted">${intro}</p>` + fields.map((f) => f.range
+    ? `<label class="f">${f.l}<span class="range-v" id="v-${f.k}">${f.def ?? 50}</span>${f.h ? `<span class="muted">${f.h}</span>` : ''}</label><input type="range" min="0" max="${f.max ?? 100}" value="${f.def ?? 50}" id="f-${f.k}">`
+    : `<label class="f">${f.l}${f.h ? `<span class="muted">${f.h}</span>` : ''}</label><textarea id="f-${f.k}" rows="${f.rows ?? 2}" placeholder="${esc(f.p ?? '')}"></textarea>`
+  ).join('') + '<button class="btn primary" id="f-save">저장하기</button>';
+  fields.filter((f) => f.range).forEach((f) => { const r = $('#f-' + f.k, el); r.oninput = () => $('#v-' + f.k, el).textContent = r.value; });
+  $('#f-save', el).onclick = () => {
+    const data = {};
+    fields.forEach((f) => data[f.k] = f.range ? +$('#f-' + f.k, el).value : $('#f-' + f.k, el).value.trim());
+    if (!textOptional && !fields.some((f) => !f.range && data[f.k])) { toast('한 칸이라도 적어주세요'); return; }
+    addEntry(type, data);
+    el.innerHTML = `<div class="step"><div class="big">🌿</div><div class="big">${doneMsg}</div><div class="muted">기록 탭에서 다시 볼 수 있어요.</div></div><button class="btn primary" id="go-home">홈으로</button>`;
+    $('#go-home', el).onclick = () => tab('home');
+  };
+}
+
+// ---------- 각 연습 ----------
+const RENDER = {
+  compassion(el) {
+    stepper(el, [
+      { sub: '준비', big: '편하게 앉아서, 한 손을 가슴이나 배 위에 올려보세요.', note: '손의 따뜻함과 무게를 느껴보세요. 몸은 이 신호를 "돌봄"으로 받아들여요.' },
+      { sub: '① 마음챙김', big: '지금 느끼는 힘든 마음을 그대로 인정해요.', say: '"지금 많이 힘들구나."<br>"이건 고통스러운 순간이야."' },
+      { sub: '② 보편적 인간성', big: '이런 감정은 나만 겪는 게 아니에요.', say: '"누구나 이런 순간이 있어."<br>"부족하다고 느끼는 건 사람이라서야."' },
+      { sub: '③ 자기친절', big: '가장 아끼는 친구에게 하듯 말해주세요.', say: '"괜찮아, 결과와 상관없이 너는 소중해."<br>"내가 네 편이 되어줄게."', note: '어색해도 괜찮아요. 지금 내게 필요한 말이 따로 있다면 그 말을 해주세요.' },
+      { sub: '마무리', big: '천천히 세 번 숨을 쉬어요.', say: '들이쉬며 "나는",<br>내쉬며 "충분해"' }
+    ], () => { toast('잘 돌봐줬어요 🤲'); tab('home'); });
+  },
+
+  reframe(el) {
+    form(el, '자책이 올라왔던 순간을 친구의 눈으로 다시 봐요. 정답은 없어요.', [
+      { k: 'situation', l: '무슨 일이 있었나요?', p: '예) 발표에서 질문에 제대로 대답 못 했다' },
+      { k: 'thought', l: '그때 떠오른 생각', h: '나 자신에 대해 무슨 말을 했나요?', p: '예) 나는 역시 무능해. 다들 실망했을 거야' },
+      { k: 'rule', l: '숨어있는 조건', h: '"만약 ___ 하지 못하면, 나는 ___ 이다" 형태로 써보세요', p: '예) 완벽하게 대답하지 못하면, 나는 인정받을 자격이 없다' },
+      { k: 'before', l: '그 생각을 얼마나 믿나요?', range: true, def: 70 },
+      { k: 'friend', l: '친한 친구가 똑같은 일을 겪었다면, 뭐라고 말해줄까요?', rows: 3, p: '예) 그 질문 어려웠어. 한 번 대답 못 했다고 네가 무능한 건 아니야' },
+      { k: 'balanced', l: '나에게 해줄 더 공정하고 다정한 말', rows: 3, p: '예) 대답을 못 한 건 하나의 행동이야. 나의 가치는 그대로야' },
+      { k: 'after', l: '지금은 처음 생각을 얼마나 믿나요?', range: true, def: 50 }
+    ], 'reframe', '친구에게 하듯 나를 대해줬어요.');
+  },
+
+  defuse(el) {
+    el.innerHTML = `<p class="muted">머릿속을 맴도는 자책 한 문장을 적어보세요.</p>
+      <input type="text" id="df-in" placeholder="예) 나는 아직 한참 부족해">
+      <button class="btn primary" id="df-go">거리두기</button><div id="df-out"></div>`;
+    $('#df-go').onclick = () => {
+      const t = $('#df-in').value.trim().replace(/[.。!]+$/, '');
+      if (!t) { toast('한 문장을 적어주세요'); return; }
+      const lines = [
+        ['그대로', `${esc(t)}.`],
+        ['한 걸음', `나는 지금 <b>"${esc(t)}"</b>라는 생각을 하고 있다.`],
+        ['두 걸음', `내 마음이 또 <b>"${esc(t)}"</b>라는 익숙한 이야기를 들려주고 있구나.`],
+        ['이름 붙이기', `아, 이건 <b>"성과 이야기"</b>야. 어릴 때부터 자주 듣던 노래지.`],
+        ['고마워하기', `나를 지키려고 애써줘서 고마워, 마음아. 그래도 이 생각이 내가 누구인지 정하지는 않아.`]
+      ];
+      $('#df-out').innerHTML = lines.map(([k, v]) => `<div class="box" style="margin-top:10px"><span class="tag">${k}</span><p style="font-size:17px">${v}</p></div>`).join('') +
+        `<p class="muted small">문장을 읽을수록 생각과 나 사이에 틈이 느껴지나요? 생각은 사라지지 않아도 괜찮아요. 붙잡히지 않으면 돼요.</p><button class="btn" id="df-save">기록에 남기기</button>`;
+      $('#df-save').onclick = () => { addEntry('defuse', { thought: t }); toast('기록했어요'); $('#df-save').remove(); };
+    };
+  },
+
+  evidence(el) {
+    form(el, '성과와 상관없이, 내가 있는 그대로 괜찮다는 걸 보여준 오늘의 작은 순간을 모아요. 하나만 써도 충분해요.', [
+      { k: 'received', l: '조건 없이 받은 따뜻함', h: '내가 뭘 잘해서가 아닌데도 받은 친절, 연락, 웃음', p: '예) 아무 이유 없이 친구가 안부를 물었다' },
+      { k: 'gave', l: '내가 건넨 따뜻함', h: '내가 누군가에게 존재만으로 해준 것', p: '예) 동생 이야기를 끝까지 들어줬다' },
+      { k: 'self', l: '내가 나를 다정하게 대한 순간', p: '예) 실수했을 때 "괜찮아"라고 말해봤다' },
+      { k: 'moment', l: '그냥 좋았던 순간', p: '예) 퇴근길 하늘이 예뻤다' }
+    ], 'evidence', '새로운 믿음의 증거가 하나 더 쌓였어요.');
+  },
+
+  rest(el) {
+    let mins = 5, left = 0, running = false;
+    const prompts = ['지금 아무것도 하지 않아도 돼요.', '이 시간은 벌지 않아도 되는 시간이에요.', '"뭐라도 해야 하는데"라는 생각이 오면, 그냥 지나가게 두세요.', '숨이 저절로 들어오고 나가는 걸 느껴보세요.', '쉬는 나도, 일하는 나와 같은 가치가 있어요.', '불안이 올라와도 괜찮아요. 그건 오래된 습관의 신호일 뿐이에요.'];
+    el.innerHTML = `<p class="muted">생산적인 일 없이, 핸드폰도 내려놓고 그냥 있어보는 연습이에요. 불안이나 죄책감이 올라오는 건 정상이에요. 그걸 견디며 "아무 일도 일어나지 않는다"를 몸으로 배우는 게 목적이에요.</p>
+      <label class="f">시작 전, 쉬는 것에 대한 죄책감<span class="range-v" id="v-g1">5</span></label><input type="range" min="0" max="10" value="5" id="g1">
+      <div class="chips">${[3, 5, 10].map((m) => `<button class="chip${m === mins ? ' on' : ''}" data-m="${m}">${m}분</button>`).join('')}</div>
+      <div class="breath paused" id="br"></div>
+      <div class="timer" id="tm">05:00</div>
+      <p class="muted" id="rp" style="text-align:center;min-height:48px">준비가 되면 시작을 눌러주세요.</p>
+      <button class="btn primary" id="rs">시작</button>
+      <div id="rest-after"></div>`;
+    const tm = $('#tm'), show = (s) => tm.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+    $('#g1').oninput = (e) => $('#v-g1').textContent = e.target.value;
+    el.querySelectorAll('.chip').forEach((c) => c.onclick = () => { if (running) return; mins = +c.dataset.m; el.querySelectorAll('.chip').forEach((x) => x.classList.toggle('on', x === c)); show(mins * 60); });
+    const finish = () => {
+      stopTimer(); running = false; $('#br').classList.add('paused'); $('#rs').remove();
+      $('#rp').textContent = '끝났어요. 아무것도 하지 않은 시간에도 세상은 무너지지 않았어요.';
+      if (navigator.vibrate) navigator.vibrate(200);
+      $('#rest-after').innerHTML = `<label class="f">지금, 쉬는 것에 대한 죄책감<span class="range-v" id="v-g2">5</span></label><input type="range" min="0" max="10" value="5" id="g2">
+        <label class="f">쉬는 동안 무엇을 느꼈나요? <span class="muted">(선택)</span></label><textarea id="rn" rows="2" placeholder="예) 처음엔 불안했는데 중간부터 조금 편해졌다"></textarea>
+        <button class="btn primary" id="rsave">기록하기</button>`;
+      $('#g2').oninput = (e) => $('#v-g2').textContent = e.target.value;
+      $('#rsave').onclick = () => { addEntry('rest', { mins, before: +$('#g1').value, after: +$('#g2').value, note: $('#rn').value.trim() }); toast('쉬어줘서 고마워요 🛋️'); tab('home'); };
+    };
+    $('#rs').onclick = () => {
+      if (running) { finish(); return; }
+      running = true; left = mins * 60; show(left);
+      $('#rs').textContent = '여기서 마치기'; $('#br').classList.remove('paused');
+      let k = 0; $('#rp').textContent = prompts[0];
+      const end = Date.now() + left * 1000;
+      timerH = setInterval(() => {
+        left = Math.max(0, Math.round((end - Date.now()) / 1000)); show(left);
+        if (left % 30 === 0 && left > 0) $('#rp').textContent = prompts[++k % prompts.length];
+        if (left <= 0) finish();
+      }, 1000);
+    };
+  },
+
+  experiment(el) {
+    form(el, '"성과를 못 내면 사랑받지 못한다"는 예측을 작은 행동으로 시험해봐요. 계획을 먼저 저장하고, 해본 뒤 결과를 적어도 좋아요.', [
+      { k: 'action', l: '해볼 작은 행동', h: '일부러 "충분히 괜찮은" 수준으로 해보기', p: '예) 보고서를 80%만 다듬고 제출하기 / 칭찬에 "고마워"라고만 답하기 / 도움 요청하기' },
+      { k: 'fear', l: '두려운 예측', h: '무슨 일이 일어날 것 같나요?', p: '예) 상사가 실망하고 나를 무능하다고 볼 것이다' },
+      { k: 'belief', l: '그 예측을 얼마나 믿나요?', range: true, def: 70 },
+      { k: 'result', l: '실제로 일어난 일', h: '해본 뒤에 적어요 (나중에 새로 기록해도 돼요)', rows: 3, p: '예) 별말 없이 넘어갔다. 하나 수정 요청만 받았다' },
+      { k: 'learned', l: '배운 것', rows: 2, p: '예) 100%가 아니어도 관계는 그대로였다' }
+    ], 'experiment', '용기 있는 실험이었어요.');
+  },
+
+  letter(el) {
+    form(el, '잘해야만 칭찬받던 어린 시절의 나를 떠올려보세요. 몇 살쯤인가요? 그 아이에게, 조건 없이 사랑해주는 어른으로서 편지를 써보세요.', [
+      { k: 'age', l: '떠오르는 나이와 장면', p: '예) 10살, 시험 점수가 낮아 혼날까 봐 성적표를 숨기던 나' },
+      { k: 'letter', l: '그 아이에게', h: '그 아이가 정말 듣고 싶었던 말은 무엇이었을까요?', rows: 9, p: '예) 점수와 상관없이 너는 사랑받을 아이야. 그때 많이 무서웠지...' }
+    ], 'letter', '그 아이가 오래 기다리던 말이었을 거예요.');
+  },
+
+  belief(el) {
+    form(el, '정답이 아니라, 지금 몸으로 느껴지는 정도를 솔직하게 매겨주세요. 일주일에 한 번쯤 기록하면 변화가 보여요.', [
+      { k: 'new', l: '"나는 있는 그대로 충분하다"', h: '0 = 전혀 안 믿어짐 · 100 = 완전히 믿어짐', range: true, def: 30 },
+      { k: 'old', l: '"성과를 내야 사랑받을 가치가 있다"', h: '0 = 전혀 안 믿어짐 · 100 = 완전히 믿어짐', range: true, def: 70 },
+      { k: 'note', l: '메모 (선택)', p: '예) 이번 주엔 시험이 있어서 옛 믿음이 강했다' }
+    ], 'belief', '지금의 나를 솔직하게 봐줬어요.', true);
+  },
+
+  sos(el) {
+    stepper(el, [
+      { sub: '멈춤', big: '잠깐 멈춰요. 지금 할 일은 해결이 아니라, 나를 진정시키는 거예요.', note: '천천히 숨을 내쉬어요. 들숨보다 날숨을 길게.' },
+      { sub: '알아차림', big: '지금 머릿속에서 나를 공격하는 목소리가 들리나요?', say: '"아, 내면의 비판자가 왔구나."', note: '그 목소리는 내가 아니에요. 나를 지키려다 너무 거칠어진 오래된 습관이에요.' },
+      { sub: '분리', big: '실수는 내가 <b>한 일</b>이지,<br>내가 <b>어떤 사람인지</b>가 아니에요.', say: '"나는 실패했다" ≠ "나는 실패자다"' },
+      { sub: '사실 확인', big: '이 일이 1년 뒤에도 이만큼 중요할까요?', note: '그리고 나를 정말 아끼는 사람이라면, 이 일 때문에 나를 덜 사랑할까요?' },
+      { sub: '자기친절', big: '손을 가슴에 얹고 말해주세요.', say: '"속상한 게 당연해.<br>그래도 너는 여전히 소중해."' },
+      { sub: '다음 한 걸음', big: '지금 나를 위해 할 수 있는 아주 작은 일 하나는?', note: '물 한 잔 마시기, 바깥 공기 쐬기, 믿을 만한 사람에게 연락하기. 해결은 마음이 가라앉은 뒤에 해도 늦지 않아요.' }
+    ], () => { toast('잘 버텨줬어요 🌧️→🌤️'); openPractice('reframe'); });
+  }
+};
+
+function stopTimer() { if (timerH) { clearInterval(timerH); timerH = null; } }
+
+// ---------- 기록 ----------
+function renderChart() {
+  const pts = D.entries.filter((e) => e.type === 'belief').slice().reverse();
+  if (pts.length < 2) { $('#chart').innerHTML = `<p class="muted small">믿음 체크를 두 번 이상 하면 그래프가 그려져요. (지금 ${pts.length}회)</p>`; return; }
+  const W = 320, H = 140, P = 10, n = pts.length;
+  const x = (i) => P + (W - 2 * P) * i / (n - 1), y = (v) => H - P - (H - 2 * P) * v / 100;
+  const line = (k, c) => `<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" points="${pts.map((p, i) => `${x(i)},${y(p.data[k])}`).join(' ')}"/>` +
+    pts.map((p, i) => `<circle cx="${x(i)}" cy="${y(p.data[k])}" r="3.5" fill="${c}"/>`).join('');
+  $('#chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}">${[0, 50, 100].map((v) => `<line x1="${P}" x2="${W - P}" y1="${y(v)}" y2="${y(v)}" stroke="#3a3128" stroke-dasharray="3 4"/>`).join('')}${line('old', '#8fb3e0')}${line('new', '#f2a65a')}</svg>
+    <div class="muted small">${fmtDate(pts[0].at).split(' ').slice(0, 2).join(' ')} → ${fmtDate(pts[n - 1].at).split(' ').slice(0, 2).join(' ')} · 새 믿음 ${pts[0].data.new} → ${pts[n - 1].data.new}</div>`;
+}
+const LABELS = {
+  reframe: { situation: '상황', thought: '떠오른 생각', rule: '숨어있는 조건', before: '처음 믿음', friend: '친구라면', balanced: '다정한 말', after: '나중 믿음' },
+  evidence: { received: '받은 따뜻함', gave: '건넨 따뜻함', self: '나에게 다정했던 순간', moment: '좋았던 순간' },
+  rest: { mins: '시간(분)', before: '죄책감 전', after: '죄책감 후', note: '느낀 점' },
+  experiment: { action: '행동', fear: '두려운 예측', belief: '예측 믿음', result: '실제 결과', learned: '배운 것' },
+  letter: { age: '장면', letter: '편지' },
+  belief: { new: '있는 그대로 충분하다', old: '성과를 내야 가치있다', note: '메모' },
+  defuse: { thought: '거리둔 생각' }
+};
+function renderJournal() {
+  renderChart();
+  if (!D.entries.length) { $('#entries').innerHTML = '<div class="box muted">아직 기록이 없어요. 연습 탭에서 하나 골라보세요.</div>'; return; }
+  $('#entries').innerHTML = D.entries.map((e) => `<div class="entry"><div class="h"><span class="tag a">${TYPE_NAME[e.type] || e.type}</span><span class="muted small">${fmtDate(e.at)}</span></div>
+    ${Object.entries(LABELS[e.type] || {}).filter(([k]) => String(e.data[k] ?? '').trim() !== '').map(([k, l]) => `<div class="k">${l}</div><div class="v">${esc(e.data[k])}</div>`).join('')}
+    <div style="text-align:right"><button class="del" data-del="${e.id}">삭제</button></div></div>`).join('');
+  document.querySelectorAll('[data-del]').forEach((b) => b.onclick = () => {
+    if (!confirm('이 기록을 삭제할까요?')) return;
+    D.entries = D.entries.filter((e) => e.id !== b.dataset.del); save(); renderJournal();
+  });
+}
+$('#export').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(D, null, 1)], { type: 'application/json' }));
+  a.download = `있는그대로-백업-${today()}.json`; a.click();
+};
+$('#import').onclick = () => $('#import-file').click();
+$('#import-file').onchange = async (e) => {
+  try {
+    const d = JSON.parse(await e.target.files[0].text());
+    if (!Array.isArray(d.entries)) throw 0;
+    const ids = new Set(D.entries.map((x) => x.id));
+    D.entries = D.entries.concat(d.entries.filter((x) => !ids.has(x.id))).sort((a, b) => b.at.localeCompare(a.at));
+    D.visits = [...new Set(D.visits.concat(d.visits || []))].sort();
+    save(); renderJournal(); toast('가져왔어요');
+  } catch { toast('백업 파일을 읽지 못했어요'); }
+  e.target.value = '';
+};
+
+// ---------- 시작 ----------
+if (!D.visits.includes(today())) { D.visits.push(today()); save(); }
+renderHome();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
