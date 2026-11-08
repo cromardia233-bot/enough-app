@@ -1,5 +1,5 @@
 // 오프라인 캐시: 앱 파일은 네트워크 우선 → 실패 시 캐시
-const CACHE = 'enough-v1';
+const CACHE = 'enough-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
